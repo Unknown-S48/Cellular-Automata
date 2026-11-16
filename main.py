@@ -1,10 +1,37 @@
 import cellpylib as cpl
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
-cellular_automaton = np.array([[0,0,1,0,0]])
+cellular_automaton = cpl.init_random2d(60, 60)
 
-cellular_automaton = cpl.evolve(cellular_automaton, timesteps=5,
-memoize=True,
-apply_rule=lambda n, c, t: cpl.nks_rule(n, 110))
+# Glider
+cellular_automaton[:, [28,29,30,30], [30,31,29,31]] = 1
 
-cpl.plot(cellular_automaton)
+# Blinker
+cellular_automaton[:, [40,40,40], [15,16,17]] = 1
+
+# LWSS
+cellular_automaton[:, [18,18,19,20,21,21,21,21,20], [45,48,44,44,44,45,46,47,48]] = 1
+
+cellular_automaton = cpl.evolve2d(
+    cellular_automaton,
+    timesteps=250,
+    neighbourhood='Moore',
+    memoize=True,
+    apply_rule=cpl.game_of_life_rule,
+)
+
+fig, ax = plt.subplots()
+mat = ax.matshow(cellular_automaton[0], cmap='binary')
+plt.axis('off')
+
+def animate(i):
+    mat.set_data(cellular_automaton[i])
+    return [mat]
+
+ani = animation.FuncAnimation(
+    fig, animate, frames=30, interval=50, blit=True, repeat=False
+)
+
+plt.show()
